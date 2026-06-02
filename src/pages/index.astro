@@ -20,13 +20,17 @@
         margin-bottom: 1.5rem;
         color: #111827;
       }
+      .search-container {
+        position: relative;
+        width: 100%;
+        margin-bottom: 2rem;
+      }
       input {
         width: 100%;
-        padding: 1.2rem;
+        padding: 1.2rem 3.5rem 1.2rem 1.2rem; /* Extra padding on right for the X button */
         font-size: 1.2rem;
         border: 2px solid #d1d5db;
         border-radius: 8px;
-        margin-bottom: 2rem;
         box-sizing: border-box;
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
       }
@@ -35,8 +39,32 @@
         border-color: #3b82f6;
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
       }
+      .clear-btn {
+        position: absolute;
+        right: 1.2rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #e4e4e7;
+        color: #71717a;
+        border: none;
+        border-radius: 50%;
+        width: 2rem;
+        height: 2rem;
+        font-size: 1.2rem;
+        font-weight: bold;
+        cursor: pointer;
+        display: none; /* Hidden by default */
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        line-height: 1;
+      }
+      .clear-btn:hover {
+        background: #d4d4d8;
+        color: #3f3f46;
+      }
       .result-card {
-        background: white;
+        background: white !important;
         padding: 1.2rem;
         margin-bottom: 1rem;
         border-radius: 8px;
@@ -52,12 +80,12 @@
       .icd-code {
         font-weight: 800;
         font-size: 1.2rem;
-        color: #2563eb;
+        color: #2563eb !important;
         margin-bottom: 0.25rem;
       }
       .description {
         font-size: 1rem;
-        color: #4b5563;
+        color: #4b5563 !important;
         line-height: 1.4;
       }
       .badges {
@@ -67,8 +95,8 @@
         justify-content: flex-end;
       }
       .hcc-badge {
-        background-color: #ef4444; /* Bright Red */
-        color: white;
+        background-color: #ef4444 !important; /* Force Bright Red */
+        color: white !important;
         padding: 0.5rem 1rem;
         border-radius: 9999px;
         font-weight: 700;
@@ -76,8 +104,8 @@
         white-space: nowrap;
       }
       .rxhcc-badge {
-        background-color: #8b5cf6; /* Vibrant Purple */
-        color: white;
+        background-color: #8b5cf6 !important; /* Force Vibrant Purple */
+        color: white !important;
         padding: 0.5rem 1rem;
         border-radius: 9999px;
         font-weight: 700;
@@ -89,12 +117,15 @@
   <body>
     <h1>⚕️ Medical Coding: HCC & RxHCC Search</h1>
     
-    <input 
-      type="text" 
-      id="search-bar" 
-      placeholder="Type an ICD-10 code (e.g., E11) or diagnosis keyword..." 
-      autocomplete="off"
-    />
+    <div class="search-container">
+      <input 
+        type="text" 
+        id="search-bar" 
+        placeholder="Type an ICD-10 code (e.g., E11) or diagnosis..." 
+        autocomplete="off"
+      />
+      <button id="clear-button" class="clear-btn" aria-label="Clear search">×</button>
+    </div>
     
     <div id="results">
       <p id="loading-text" style="color: #6b7280;">Loading database...</p>
@@ -103,9 +134,9 @@
     <script>
       let hccData = [];
       const searchBar = document.getElementById('search-bar');
+      const clearButton = document.getElementById('clear-button');
       const resultsContainer = document.getElementById('results');
 
-      // Fetch the newly generated data.json file
       fetch('/data.json')
         .then(response => response.json())
         .then(data => {
@@ -113,22 +144,25 @@
           resultsContainer.innerHTML = `<p style="color: #10b981; font-weight: bold;">Ready! Loaded ${data.length.toLocaleString()} diagnostic codes.</p>`;
         });
 
+      // Toggle Clear Button visibility and filter data
       searchBar.addEventListener('input', (e) => {
         const searchTerm = e.target.value.toLowerCase().trim();
         
+        if (searchTerm.length > 0) {
+          clearButton.style.display = 'flex';
+        } else {
+          clearButton.style.display = 'none';
+        }
+
         if (searchTerm.length < 2) {
           resultsContainer.innerHTML = '';
           return;
         }
 
         const filteredData = hccData.filter(item => {
-          // Check for exact lowercase matches to prevent case-sensitivity errors
           const codeMatch = item.icd10 && String(item.icd10).toLowerCase().includes(searchTerm);
-          
-          // Using a fallback just in case DuckDB exported it as Description with a capital D
           const descText = item.description || item.Description || "";
           const descMatch = descText.toLowerCase().includes(searchTerm);
-          
           return codeMatch || descMatch;
         }).slice(0, 50);
 
@@ -138,11 +172,8 @@
         }
 
         resultsContainer.innerHTML = filteredData.map(item => {
-          // We only want to show the badges if the data actually exists for that code
           const hccHtml = item.hcc_v28 ? `<div class="hcc-badge">HCC ${item.hcc_v28}</div>` : '';
           const rxHccHtml = item.rxhcc_v08 ? `<div class="rxhcc-badge">RxHCC ${item.rxhcc_v08}</div>` : '';
-          
-          // Get the description safely
           const descriptionText = item.description || item.Description || "No description available";
 
           return `
@@ -158,6 +189,14 @@
             </div>
           `;
         }).join('');
+      });
+
+      // Clear Button functionality
+      clearButton.addEventListener('click', () => {
+        searchBar.value = '';
+        clearButton.style.display = 'none';
+        resultsContainer.innerHTML = '';
+        searchBar.focus();
       });
     </script>
   </body>
