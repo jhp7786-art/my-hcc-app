@@ -1,11 +1,164 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+// src/pages/index.astro
 ---
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HCC & RxHCC Rapid Search</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        background-color: #f4f4f5;
+        color: #18181b;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+      h1 {
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+        color: #111827;
+      }
+      input {
+        width: 100%;
+        padding: 1.2rem;
+        font-size: 1.2rem;
+        border: 2px solid #d1d5db;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        box-sizing: border-box;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      }
+      input:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      }
+      .result-card {
+        background: white;
+        padding: 1.2rem;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .icd-info {
+        max-width: 70%;
+      }
+      .icd-code {
+        font-weight: 800;
+        font-size: 1.2rem;
+        color: #2563eb;
+        margin-bottom: 0.25rem;
+      }
+      .description {
+        font-size: 1rem;
+        color: #4b5563;
+        line-height: 1.4;
+      }
+      .badges {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+      .hcc-badge {
+        background-color: #ef4444; /* Bright Red */
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-weight: 700;
+        font-size: 1rem;
+        white-space: nowrap;
+      }
+      .rxhcc-badge {
+        background-color: #8b5cf6; /* Vibrant Purple */
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-weight: 700;
+        font-size: 1rem;
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>⚕️ Medical Coding: HCC & RxHCC Search</h1>
+    
+    <input 
+      type="text" 
+      id="search-bar" 
+      placeholder="Type an ICD-10 code (e.g., E11) or diagnosis keyword..." 
+      autocomplete="off"
+    />
+    
+    <div id="results">
+      <p id="loading-text" style="color: #6b7280;">Loading database...</p>
+    </div>
 
-<Layout>
-	<Welcome />
-</Layout>
+    <script>
+      let hccData = [];
+      const searchBar = document.getElementById('search-bar');
+      const resultsContainer = document.getElementById('results');
+
+      // Fetch the newly generated data.json file
+      fetch('/data.json')
+        .then(response => response.json())
+        .then(data => {
+          hccData = data;
+          resultsContainer.innerHTML = `<p style="color: #10b981; font-weight: bold;">Ready! Loaded ${data.length.toLocaleString()} diagnostic codes.</p>`;
+        });
+
+      searchBar.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase().trim();
+        
+        if (searchTerm.length < 2) {
+          resultsContainer.innerHTML = '';
+          return;
+        }
+
+        const filteredData = hccData.filter(item => {
+          // Check for exact lowercase matches to prevent case-sensitivity errors
+          const codeMatch = item.icd10 && String(item.icd10).toLowerCase().includes(searchTerm);
+          
+          // Using a fallback just in case DuckDB exported it as Description with a capital D
+          const descText = item.description || item.Description || "";
+          const descMatch = descText.toLowerCase().includes(searchTerm);
+          
+          return codeMatch || descMatch;
+        }).slice(0, 50);
+
+        if (filteredData.length === 0) {
+          resultsContainer.innerHTML = '<p style="color: #6b7280; font-style: italic;">No matching codes found.</p>';
+          return;
+        }
+
+        resultsContainer.innerHTML = filteredData.map(item => {
+          // We only want to show the badges if the data actually exists for that code
+          const hccHtml = item.hcc_v28 ? `<div class="hcc-badge">HCC ${item.hcc_v28}</div>` : '';
+          const rxHccHtml = item.rxhcc_v08 ? `<div class="rxhcc-badge">RxHCC ${item.rxhcc_v08}</div>` : '';
+          
+          // Get the description safely
+          const descriptionText = item.description || item.Description || "No description available";
+
+          return `
+            <div class="result-card">
+              <div class="icd-info">
+                <div class="icd-code">${item.icd10}</div>
+                <div class="description">${descriptionText}</div>
+              </div>
+              <div class="badges">
+                ${hccHtml}
+                ${rxHccHtml}
+              </div>
+            </div>
+          `;
+        }).join('');
+      });
+    </script>
+  </body>
+</html>
