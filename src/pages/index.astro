@@ -136,11 +136,10 @@
       <p id="loading-text" style="color: #6b7280;">Loading database...</p>
     </div>
 
-    <script>
+   <script>
       let hccData = [];
-      let activeCompliment = ""; // State lock to prevent flickering
+      let activeCompliment = ""; 
       
-      // Centralized  Array of luv since she didnt believe me
       const husbandSayings = [
         "✅ Match successful. Reminder: The guy who built this loves you MORE.",
         "✅ Data loaded. (Because your husband writes highly optimized code).",
@@ -156,20 +155,9 @@
         "✅ Data retrieved. I'm so lucky I get to do life with you. 🌊❤️",
         "✅ Success. Just a quick reminder that I love you MORE than well.....anything. ☕️❤️"
       ];
-        
 
-      // --- DEVICE SECURITY LOCK ---
-      // 1. Check if the secret URL parameter is present
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('auth') === 'wife') {
-        // Save the VIP token to this browser forever
-        localStorage.setItem('vip_access', 'granted');
-        // Clean up the URL so the secret code disappears
-        window.history.replaceState({}, document.title, window.location.pathname);
-      }
-      // 2. Check if this device has the VIP token
-      const isWifeDevice = localStorage.getItem('vip_access') === 'granted';
-      // ----------------------------
+      // Check if the device is already unlocked
+      let isWifeDevice = localStorage.getItem('vip_access') === 'granted';
 
       const searchBar = document.getElementById('search-bar');
       const clearButton = document.getElementById('clear-button');
@@ -185,11 +173,26 @@
       searchBar.addEventListener('input', (e) => {
         const searchTerm = e.target.value.toLowerCase().trim();
 
+        // --- THE SNEAKY BACKDOOR CHEAT CODE ---
+        if (searchTerm === 'hccvip') {
+          localStorage.setItem('vip_access', 'granted');
+          isWifeDevice = true; // Instantly turn on wife mode
+          searchBar.value = ''; // Erase the evidence
+          resultsContainer.innerHTML = `
+            <div style="background: #fff0f5; border: 2px dashed #ff4d94; padding: 20px; border-radius: 12px; text-align: center; margin-top: 20px;">
+              <h3 style="color: #d6005c; margin: 0;">💕 VIP Mode Permanently Unlocked 💕</h3>
+              <p style="color: #990033; font-size: 0.9em;">Husband Override System is now active on this device.</p>
+            </div>
+          `;
+          setTimeout(() => { resultsContainer.innerHTML = ""; }, 3500); // Clear the message after 3.5 seconds
+          return;
+        }
+        // ----------------------------------------
+
         // --- SNEAKY HUSBAND OVERRIDE (LOCKED) ---
         if (isWifeDevice && (searchTerm.includes('jeff') || searchTerm.includes('love'))) {
           
-          // Play the voice memo!
-          new Audio('/love-note.m4a').play().catch(err => console.log("Browser blocked autoplay, but the trap is still set."));
+          new Audio('/love-note.m4a').play().catch(err => console.log("Browser blocked autoplay."));
 
           resultsContainer.innerHTML = `
             <div style="text-align: center; padding: 50px 20px; background-color: #fff0f5; background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' opacity='0.15'%3E%3Cpath fill='%23ff0066' d='M462.3 62.6C407.5 15.9 326 24.3 275.7 76.2L256 96.5l-19.7-20.3C186.1 24.3 104.5 15.9 49.7 62.6c-62.8 53.6-66.1 149.8-9.9 207.9l193.5 199.8c12.5 12.9 32.8 12.9 45.3 0l193.5-199.8c56.3-58.1 53-154.3-9.8-207.9z'/%3E%3C/svg%3E&quot;); background-size: 60%; background-position: center; background-repeat: no-repeat; border-radius: 24px; border: 4px dashed #ff4d94; box-shadow: 0px 0px 20px rgba(255, 77, 148, 0.3); color: #990033; margin-top: 20px;">
@@ -215,7 +218,7 @@
 
         if (searchTerm.length < 2) {
           resultsContainer.innerHTML = '';
-          activeCompliment = ""; // Reset the compliment lock
+          activeCompliment = ""; 
           return;
         }
 
@@ -228,12 +231,11 @@
 
         if (filteredData.length === 0) {
           resultsContainer.innerHTML = '<p style="color: #6b7280; font-style: italic;">No matching codes found.</p>';
-          activeCompliment = ""; // Reset the compliment lock
+          activeCompliment = ""; 
           return;
         }
 
         // --- RANDOM HUSBAND COMPLIMENT (LOCKED) ---
-        // Only run if it's her device, hits the 10% chance, AND a compliment isn't already showing
         if (isWifeDevice && Math.random() < 0.1 && activeCompliment === "") {
           const randomMsg = husbandSayings[Math.floor(Math.random() * husbandSayings.length)];
           activeCompliment = `
@@ -269,7 +271,7 @@
         searchBar.value = '';
         clearButton.style.display = 'none';
         resultsContainer.innerHTML = '';
-        activeCompliment = ""; // Reset the compliment lock
+        activeCompliment = ""; 
         searchBar.focus();
       });
     </script>
