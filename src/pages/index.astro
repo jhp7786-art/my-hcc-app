@@ -4,9 +4,16 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>HCC & RxHCC Rapid Search</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HCC Search" />
+    <link rel="apple-touch-icon" href="/app-icon.jpg" />
+    
     <style is:global>
+    >
       body {
         font-family: system-ui, -apple-system, sans-serif;
         background-color: #f4f4f5;
@@ -27,7 +34,7 @@
       }
       input {
         width: 100%;
-        padding: 1.2rem 3.5rem 1.2rem 1.2rem; /* Extra padding on right for the X button */
+        padding: 1.2rem 3.5rem 1.2rem 1.2rem;
         font-size: 1.2rem;
         border: 2px solid #d1d5db;
         border-radius: 8px;
@@ -53,7 +60,7 @@
         font-size: 1.2rem;
         font-weight: bold;
         cursor: pointer;
-        display: none; /* Hidden by default */
+        display: none;
         align-items: center;
         justify-content: center;
         padding: 0;
@@ -95,7 +102,7 @@
         justify-content: flex-end;
       }
       .hcc-badge {
-        background-color: #ef4444 !important; /* Force Bright Red */
+        background-color: #ef4444 !important;
         color: white !important;
         padding: 0.5rem 1rem;
         border-radius: 9999px;
@@ -104,7 +111,7 @@
         white-space: nowrap;
       }
       .rxhcc-badge {
-        background-color: #8b5cf6 !important; /* Force Vibrant Purple */
+        background-color: #8b5cf6 !important;
         color: white !important;
         padding: 0.5rem 1rem;
         border-radius: 9999px;
@@ -133,6 +140,40 @@
 
     <script>
       let hccData = [];
+      let activeCompliment = ""; // State lock to prevent flickering
+      
+      // Centralized  Array of luv since she didnt believe me
+      const husbandSayings = [
+        
+        "✅ Match successful. Reminder: The guy who built this loves you MORE.",
+        "✅ Data loaded. (Because your husband writes highly optimized code).",
+        "✅ HCC Code Found. Also, your husband says you are a smoking hot babe.",
+        "✅ Warning: High volume of love detected in developer console. hubba hubba 🥰",
+        "✅ Query successful. System diagnostic: You are the most beautiful babe ever. 💻🔥",
+        "✅ Code loaded. If there was an HCC code for 'perfect wife', you'd be it. ⚕️💯",
+        "✅ Result found. (And yes, the guy who programmed this is thinking about you). 😏💭",
+        "✅ Search complete. My favorite data point today is still that you said 'I do' 20 years ago. 💍✨",
+        "✅ Match! You make risk adjustment look incredibly good. 🔥😍",
+        "✅ System check: You're doing amazing today, beautiful. Keep crushing it! 💪❤️",
+        "✅ Alert: Extreme levels of gorgeousness detected at this keyboard. 🚨😳",
+        "✅ Data retrieved. I'm so lucky I get to do life with you. 🌊❤️",
+        "✅ Success. Just a quick reminder that I love you MORE than well.....anything. ☕️❤️"
+      ];
+        
+
+      // --- DEVICE SECURITY LOCK ---
+      // 1. Check if the secret URL parameter is present
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('auth') === 'wife') {
+        // Save the VIP token to this browser forever
+        localStorage.setItem('vip_access', 'granted');
+        // Clean up the URL so the secret code disappears
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+      // 2. Check if this device has the VIP token
+      const isWifeDevice = localStorage.getItem('vip_access') === 'granted';
+      // ----------------------------
+
       const searchBar = document.getElementById('search-bar');
       const clearButton = document.getElementById('clear-button');
       const resultsContainer = document.getElementById('results');
@@ -144,10 +185,31 @@
           resultsContainer.innerHTML = `<p style="color: #10b981; font-weight: bold;">Ready! Loaded ${data.length.toLocaleString()} diagnostic codes.</p>`;
         });
 
-      // Toggle Clear Button visibility and filter data
       searchBar.addEventListener('input', (e) => {
         const searchTerm = e.target.value.toLowerCase().trim();
-        
+
+        // --- SNEAKY HUSBAND OVERRIDE (LOCKED) ---
+        if (isWifeDevice && (searchTerm.includes('jeff') || searchTerm.includes('love'))) {
+          
+          // Play the voice memo!
+          new Audio('/love-note.m4a').play().catch(err => console.log("Browser blocked autoplay, but the trap is still set."));
+
+          resultsContainer.innerHTML = `
+            <div style="text-align: center; padding: 50px 20px; background-color: #fff0f5; background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' opacity='0.15'%3E%3Cpath fill='%23ff0066' d='M462.3 62.6C407.5 15.9 326 24.3 275.7 76.2L256 96.5l-19.7-20.3C186.1 24.3 104.5 15.9 49.7 62.6c-62.8 53.6-66.1 149.8-9.9 207.9l193.5 199.8c12.5 12.9 32.8 12.9 45.3 0l193.5-199.8c56.3-58.1 53-154.3-9.8-207.9z'/%3E%3C/svg%3E&quot;); background-size: 60%; background-position: center; background-repeat: no-repeat; border-radius: 24px; border: 4px dashed #ff4d94; box-shadow: 0px 0px 20px rgba(255, 77, 148, 0.3); color: #990033; margin-top: 20px;">
+              <h2 style="color: #d6005c; z-index: 2; position: relative;">🎉 System Override Successful 🎉</h2>
+              <p style="font-size: 1.2rem; z-index: 2; position: relative;"><strong>Diagnostic:</strong> 20 years of marriage detected.</p>
+              
+              <p style="font-size: 2.2rem; margin: 25px 0; z-index: 2; position: relative;">💐 🌹 🌻 🌺 🌷 🌸 🌼</p>
+              
+              <p style="font-size: 1.2rem; z-index: 2; position: relative;"><strong>Status:</strong> Husband remains awesome.</p>
+              <p style="margin-top: 20px; color: #ff4d94; z-index: 2; position: relative; font-weight: bold;"><em>Make sure your volume is up...</em></p>
+            </div>
+          `;
+          clearButton.style.display = 'flex';
+          return; 
+        }
+        // ------------------------------------------
+
         if (searchTerm.length > 0) {
           clearButton.style.display = 'flex';
         } else {
@@ -156,6 +218,7 @@
 
         if (searchTerm.length < 2) {
           resultsContainer.innerHTML = '';
+          activeCompliment = ""; // Reset the compliment lock
           return;
         }
 
@@ -168,10 +231,22 @@
 
         if (filteredData.length === 0) {
           resultsContainer.innerHTML = '<p style="color: #6b7280; font-style: italic;">No matching codes found.</p>';
+          activeCompliment = ""; // Reset the compliment lock
           return;
         }
 
-        resultsContainer.innerHTML = filteredData.map(item => {
+        // --- RANDOM HUSBAND COMPLIMENT (LOCKED) ---
+        // Only run if it's her device, hits the 10% chance, AND a compliment isn't already showing
+        if (isWifeDevice && Math.random() < 0.1 && activeCompliment === "") {
+          const randomMsg = husbandSayings[Math.floor(Math.random() * husbandSayings.length)];
+          activeCompliment = `
+            <div style="background: #e8f5e9; color: #2e7d32; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center; font-weight: bold; border: 1px solid #a5d6a7;">
+              ${randomMsg}
+            </div>`;
+        }
+        // -----------------------------------------------
+
+        const cardsHtml = filteredData.map(item => {
           const hccHtml = item.hcc_v28 ? `<div class="hcc-badge">HCC ${item.hcc_v28}</div>` : '';
           const rxHccHtml = item.rxhcc_v08 ? `<div class="rxhcc-badge">RxHCC ${item.rxhcc_v08}</div>` : '';
           const descriptionText = item.description || item.Description || "No description available";
@@ -189,13 +264,15 @@
             </div>
           `;
         }).join('');
+
+        resultsContainer.innerHTML = activeCompliment + cardsHtml;
       });
 
-      // Clear Button functionality
       clearButton.addEventListener('click', () => {
         searchBar.value = '';
         clearButton.style.display = 'none';
         resultsContainer.innerHTML = '';
+        activeCompliment = ""; // Reset the compliment lock
         searchBar.focus();
       });
     </script>
